@@ -1,0 +1,19 @@
+{
+    "name": "yangqiming/smart-qq",
+    "authors": [
+        {
+            "name": "yqm",
+            "email": "1443261811@qq.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.3",
+        "symfony/console": "^4.1",
+        "aferrandini/phpqrcode": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "smartQQ\\": "src/"
+        }
+    }
+}
