@@ -10,25 +10,57 @@ class Login extends Base
 
     protected $certificationUrl;
 
+    /**
+     * 执行登陆
+     *
+     * @return void
+     */
     public function exec()
     {
         $this->makeQrCodeImg();
-
         while (true) {
             $status = $this->getQcCodeStatus();
             if ($status == 4) {
-                echo $this->certificationUrl;
                 break;
             }
-
-            usleep(1000);
+            sleep(1);
         }
+
+        $ptWebQQ = $this->getPtWebQQ($this->certificationUrl);
+        echo $vfWebQQ = $this->getVfWebQQ($ptWebQQ);
     }
 
+    protected function getPtWebQQ($uri)
+    {
+        $this->Api->makeRequest('get', $uri);
+
+        foreach ($this->Api->getCookies() as $cookie) {
+            if (0 == strcasecmp($cookie->getName(), 'ptwebqq')) {
+                return $cookie->getValue();
+            }
+        }
+        throw new LoginException('Can not find parameter [ptwebqq]');
+    }
+
+    protected function getVfWebQQ($ptWebQQ)
+    {
+        $this->setToken('ptwebqq', $ptWebQQ);
+        $uri = $this->processUri(self::Get_VfWebQQ);
+
+        $options['headers'] = [
+            'Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1',
+        ];
+        return $this->Api->makeRequest('get', $uri, $options)->getBody();
+    }
+
+    /**
+     * 获取登陆二维码,并将二维码保存到本地
+     *
+     * @return void
+     */
     protected function makeQrCodeImg()
     {
         $this->Api->setCookies(new CookieJar());
-
         $response = $this->Api->makeRequest('get', self::GET_QR_CODE);
 
         foreach ($this->Api->getCookies() as $cookie) {
@@ -42,12 +74,16 @@ class Login extends Base
         file_put_contents('qrCode.png', $text);
     }
 
+    /**
+     * 获取登陆二维码的状态
+     *
+     * @return int
+     * @throws LoginException
+     */
     protected function getQcCodeStatus()
     {
         $uri = $this->processUri(self::GET_QR_CODE_STATUS);
-
         $text = $this->Api->makeRequest('get', $uri)->getBody();
-
         if (false !== strpos($text, '未失效')) {
             $status = 1;
         } elseif (false !== strpos($text, '已失效')) {
@@ -57,11 +93,11 @@ class Login extends Base
         } else {
             $status = 4;
             //找出认证url
-            if (!preg_match("#'(http.+)'#U", strval($text), $matches)) {
+            if (preg_match("#'(http.+)'#U", strval($text), $matches)) {
+                $this->certificationUrl = trim($matches[1]);
+            } else {
                 throw new LoginException('Can not find certification url');
             }
-
-            $this->certificationUrl = trim($matches[1]);
         }
 
         return $status;
@@ -122,7 +158,6 @@ class Login extends Base
         $char = mb_substr($str, $index, 1, 'UTF-8');
         if (mb_check_encoding($char, 'UTF-8')) {
             $ret = mb_convert_encoding($char, 'UTF-32BE', 'UTF-8');
-
             return hexdec(bin2hex($ret));
         } else {
             return null;
