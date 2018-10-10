@@ -2,7 +2,7 @@
 namespace smartQQ\Core;
 
 use Pimple\Container;
-use smartQQ\ServiceProviders\LoginServiceProviders;
+use smartQQ\Core\ServiceProviders\LoginServiceProviders;
 
 class Client extends Container
 {
@@ -13,11 +13,14 @@ class Client extends Container
     public function __construct()
     {
         parent::__construct();
+
+        $this->registerProviders();
     }
 
     public function registerProviders()
     {
         foreach ($this->providers as $provider) {
+//            echo  LoginServiceProviders::class;die;
             $this->register(new $provider());
         }
     }

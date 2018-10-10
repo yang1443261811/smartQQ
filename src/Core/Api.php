@@ -3,11 +3,12 @@
 namespace smartQQ\Core;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Cookie\CookieJar;
 
 class Api
 {
     protected static $client = null;
+
+    protected $cookies;
 
     /**
      * send a curl request
@@ -35,6 +36,18 @@ class Api
         return json_decode($response, true);
     }
 
+    public function makeRequest($method, $uri, $options = array())
+    {
+        $client = self::getClient();
+
+        $options = array_merge([
+            'verify'  => false,
+            'cookies' => $this->cookies,
+        ], $options);
+
+        return $client->request($method, $uri, $options);
+    }
+
     protected static function getClient()
     {
         if (self::$client) {
@@ -42,5 +55,15 @@ class Api
         }
 
         return self::$client = new Client(['cookies' => true]);
+    }
+
+    public function setCookies($cookie)
+    {
+        $this->cookies = $cookie;
+    }
+
+    public function getCookies()
+    {
+        return $this->cookies;
     }
 }
