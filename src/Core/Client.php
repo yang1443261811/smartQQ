@@ -20,7 +20,6 @@ class Client extends Container
     public function registerProviders()
     {
         foreach ($this->providers as $provider) {
-//            echo  LoginServiceProviders::class;die;
             $this->register(new $provider());
         }
     }

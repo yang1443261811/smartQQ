@@ -2,6 +2,7 @@
 namespace smartQQ;
 
 use GuzzleHttp\Cookie\CookieJar;
+use smartQQ\Exception\LoginException;
 
 class Login extends Base
 {
@@ -57,7 +58,7 @@ class Login extends Base
             $status = 4;
             //找出认证url
             if (!preg_match("#'(http.+)'#U", strval($text), $matches)) {
-                throw new RuntimeException('Can not find certification url');
+                throw new LoginException('Can not find certification url');
             }
 
             $this->certificationUrl = trim($matches[1]);
