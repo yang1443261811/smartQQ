@@ -3,7 +3,6 @@ use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Cookie\CookieJar;
 use smartQQ\Console\QrCode;
 
-//header("Content-type: image/jpeg");
 require '../vendor/autoload.php';
 
 class Client
@@ -34,21 +33,19 @@ class Client
 
     public function login()
     {
-        while(true) {
+        $this->makeQrCodeImg();
+
+        while (true) {
             $status = $this->getQcCodeStatus();
             if ($status == 4) {
-                echo '登录成功';
-                echo $this->certificationUrl;
-                break;
-            } else {
-                echo '请扫码';
+
             }
 
             usleep(1000);
         }
     }
 
-    public function showQrCode()
+    public function makeQrCodeImg()
     {
         $this->cookies = new CookieJar();
         $response = $this->makeRequest('get', $this->api_map['showQrCode']);
@@ -60,14 +57,14 @@ class Client
             }
         }
 
-        $a = $response->getBody();
-        $str = "data:image/jpeg;base64," . base64_encode($a);
-        echo '<img src="'.$str.'"  alt="点击更换" title="点击更换" />';
+        $text= $response->getBody();
+        file_put_contents('qrCode.png', $text);
     }
 
     public function getQcCodeStatus()
     {
         $uri = $this->processUri($this->api_map['getQrCodeStatus']);
+
         $text = $this->makeRequest('get', $uri)->getBody();
 
         if (false !== strpos($text, '未失效')) {
@@ -82,6 +79,7 @@ class Client
             if (!preg_match("#'(http.+)'#U", strval($text), $matches)) {
                 throw new RuntimeException('Can not find certification url');
             }
+
             $this->certificationUrl = trim($matches[1]);
         }
 
@@ -175,7 +173,6 @@ class Client
 
 $client = new Client();
 $client->setHttpClient(new HttpClient);
-$client->showQrCode();
 
 $client->login();
 
