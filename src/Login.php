@@ -9,6 +9,13 @@ class Login extends Base
     protected $certificationUrl;
 
     /**
+     * 客户端id(固定值).
+     *
+     * @var int
+     */
+    protected static $clientId = 53999199;
+
+    /**
      * 执行登陆
      *
      * @return void
@@ -16,16 +23,23 @@ class Login extends Base
     public function exec()
     {
         $this->makeQrCodeImg();
+        echo "请扫码登陆";
         while (true) {
             $status = $this->getQcCodeStatus();
             if ($status == 4) {
+                echo "\r\n登陆成功";
                 break;
+            } elseif ($status == 2) {
+                $this->makeQrCodeImg();
+                echo "\r\n二维码失效,请重新扫码";
             }
             sleep(1);
+            echo '.';
         }
 
         $ptWebQQ = $this->getPtWebQQ($this->certificationUrl);
         $vfWebQQ = $this->getVfWebQQ($ptWebQQ);
+        list($uin, $psessionid) = $this->getUinAndPSessionId($ptWebQQ);
     }
 
     protected function getPtWebQQ($uri)
@@ -48,16 +62,42 @@ class Login extends Base
         $options['headers'] = [
             'Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1',
         ];
-        $body = $this->http->get($uri, $options)->getBody();
 
-        if ($body) {
-            $body = json_decode($body, true);
-            if (isset($body['result']) && !empty($body['result']['vfwebqq'])) {
-                return $body['result']['vfwebqq'];
-            }
+        $response = $this->http->get($uri, $options)->getBody();
+        $body = json_decode($response, true);
+
+        if (isset($body['result']) && !empty($body['result']['vfwebqq'])) {
+            return $body['result']['vfwebqq'];
         }
 
         throw new LoginException('Can not find parameter [vfwebqq]');
+    }
+
+    protected function getUinAndPSessionId($ptWebQQ)
+    {
+        $params['r'] = json_encode([
+            'psessionid' => '',
+            'status'     => 'online',
+            'ptwebqq'    => $ptWebQQ,
+            'clientid'   => static::$clientId,
+        ]);
+
+        $options = array(
+            'form_params' => $params,
+            'Referer'     => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'
+        );
+
+        $response = $this->http->post('http://d1.web2.qq.com/channel/login2', $options)->getBody();
+        $body = json_decode($response, true);
+
+        if (isset($body['result']) &&
+            !empty($body['result']['uin']) &&
+            !empty($body['result']['psessionid'])) {
+
+            return array($body['result']['uin'], $body['result']['psessionid']);
+        }
+
+        throw new LoginException('Can not find parameter [uin and psessionid]');
     }
 
     /**
