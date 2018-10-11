@@ -6,8 +6,6 @@ use smartQQ\Exception\LoginException;
 
 class Login extends Base
 {
-    protected $tokens;
-
     protected $certificationUrl;
 
     /**
@@ -27,14 +25,14 @@ class Login extends Base
         }
 
         $ptWebQQ = $this->getPtWebQQ($this->certificationUrl);
-        echo $vfWebQQ = $this->getVfWebQQ($ptWebQQ);
+        $vfWebQQ = $this->getVfWebQQ($ptWebQQ);
     }
 
     protected function getPtWebQQ($uri)
     {
-        $this->Api->makeRequest('get', $uri);
+        $this->http->get($uri);
 
-        foreach ($this->Api->getCookies() as $cookie) {
+        foreach ($this->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'ptwebqq')) {
                 return $cookie->getValue();
             }
@@ -50,7 +48,16 @@ class Login extends Base
         $options['headers'] = [
             'Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1',
         ];
-        return $this->Api->makeRequest('get', $uri, $options)->getBody();
+        $body = $this->http->get($uri, $options)->getBody();
+
+        if ($body) {
+            $body = json_decode($body, true);
+            if (isset($body['result']) && !empty($body['result']['vfwebqq'])) {
+                return $body['result']['vfwebqq'];
+            }
+        }
+
+        throw new LoginException('Can not find parameter [vfwebqq]');
     }
 
     /**
@@ -60,18 +67,17 @@ class Login extends Base
      */
     protected function makeQrCodeImg()
     {
-        $this->Api->setCookies(new CookieJar());
-        $response = $this->Api->makeRequest('get', self::GET_QR_CODE);
+        $this->http->setCookies(new CookieJar());
+        $response = $this->http->get(self::GET_QR_CODE);
 
-        foreach ($this->Api->getCookies() as $cookie) {
+        foreach ($this->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'qrsig')) {
                 $qrsig = $cookie->getValue();
                 $this->tokens['ptqrtoken'] = static::hash33($qrsig);
             }
         }
 
-        $text= $response->getBody();
-        file_put_contents('qrCode.png', $text);
+        file_put_contents('qrCode.png', $response->getBody());
     }
 
     /**
@@ -83,43 +89,22 @@ class Login extends Base
     protected function getQcCodeStatus()
     {
         $uri = $this->processUri(self::GET_QR_CODE_STATUS);
-        $text = $this->Api->makeRequest('get', $uri)->getBody();
-        if (false !== strpos($text, '未失效')) {
-            $status = 1;
-        } elseif (false !== strpos($text, '已失效')) {
-            $status = 2;
-        } elseif (false !== strpos($text, '认证中')) {
-            $status = 3;
-        } else {
-            $status = 4;
-            //找出认证url
-            if (preg_match("#'(http.+)'#U", strval($text), $matches)) {
-                $this->certificationUrl = trim($matches[1]);
-            } else {
+        $text = $this->http->get($uri)->getBody();
+        switch (true) {
+            case (false !== strpos($text, '未失效')):
+                return 1;
+            case (false !== strpos($text, '已失效')):
+                return 2;
+            case (false !== strpos($text, '认证中')):
+                return 3;
+            default:
+                //找出认证url
+                if (preg_match("#'(http.+)'#U", strval($text), $matches)) {
+                    $this->certificationUrl = trim($matches[1]);
+                    return 4;
+                }
                 throw new LoginException('Can not find certification url');
-            }
         }
-
-        return $status;
-    }
-
-    public function setToken($name, $value)
-    {
-        $this->tokens[$name] = $value;
-    }
-
-    /**
-     * 处理链接中的占位符.
-     *
-     * @param string $uri
-     *
-     * @return string
-     */
-    protected function processUri($uri)
-    {
-        return preg_replace_callback('#\{([a-zA-Z0-9_,]*)\}#i', function ($matches) {
-            return isset($this->tokens[$matches[1]]) ? $this->tokens[$matches[1]] : '';
-        }, $uri);
     }
 
     /**
