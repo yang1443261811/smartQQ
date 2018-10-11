@@ -56,6 +56,8 @@ class Identification
         $this->uin = $uin;
         $this->clientId = $clientId;
         $this->cookies = $cookies;
+
+        file_put_contents('./identity.json', json_encode($this->toArray()));
     }
 
     /**
