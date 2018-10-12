@@ -5,6 +5,7 @@ require '../vendor/autoload.php';
 
 $client = new Client();
 
-
-$client->login->exec();
+//$a = $client->identification->toArray();
+//print_r($client->identification->toArray());
+$client->login->server();
 

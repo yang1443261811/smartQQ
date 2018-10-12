@@ -82,7 +82,7 @@ class Identification
             $this->$name = $value;
         }
 
-        return $identity;
+//        return $identity;
     }
 
     /**
@@ -118,7 +118,7 @@ class Identification
             'pSessionId' => $this->pSessionId,
             'uin' => $this->uin,
             'clientId' => $this->clientId,
-            'cookies' => $this->cookies->toArray(),
+//            'cookies' => $this->cookies->toArray(),
         ];
     }
 

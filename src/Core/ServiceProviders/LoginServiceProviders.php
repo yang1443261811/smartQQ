@@ -10,7 +10,7 @@ class LoginServiceProviders implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['login'] = function ($pimple) {
-            return new Login();
+            return new Login($pimple);
         };
     }
 }
