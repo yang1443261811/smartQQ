@@ -13,9 +13,9 @@ class Client extends Container
 
     public function __construct()
     {
-        parent::__construct();
-
         $this->registerProviders();
+
+        (new Kernel($this))->bootstrap();
     }
 
     public function registerProviders()
