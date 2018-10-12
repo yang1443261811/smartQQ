@@ -6,7 +6,7 @@ use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use smartQQ\Core\Identification;
 
-class IdentificationServiceProviders implements ServiceProviderInterface
+class IdentificationServiceProvider implements ServiceProviderInterface
 {
     public function register(Container $pimple)
     {

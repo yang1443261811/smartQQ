@@ -1,16 +1,17 @@
 <?php
+
 namespace smartQQ\Core\ServiceProviders;
 
-use smartQQ\Login;
+use smartQQ\Core\Http;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
-class LoginServiceProviders implements ServiceProviderInterface
+class HttpServiceProvider implements ServiceProviderInterface
 {
     public function register(Container $pimple)
     {
-        $pimple['login'] = function ($pimple) {
-            return new Login($pimple);
+        $pimple['http'] = function ($pimple) {
+            return new Http();
         };
     }
 }

@@ -2,24 +2,27 @@
 
 namespace smartQQ\Core;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\Client as HttpClient;
 
-class Api
+class Http
 {
-    protected static $client = null;
+    protected $client;
 
     protected $cookies;
 
+    public function __construct()
+    {
+        $this->client = new HttpClient();
+    }
+
     public function get($uri, $options = array())
     {
-        $client = self::getClient();
-
         $options = array_merge([
             'verify'  => false,
             'cookies' => $this->cookies,
         ], $options);
 
-        return $client->request('get', $uri, $options);
+        return $this->client->request('get', $uri, $options);
     }
 
     public function post($uri, $options = array())
@@ -31,16 +34,17 @@ class Api
             'cookies' => $this->cookies,
         ], $options);
 
-        return $client->request('post', $uri, $options);
+        return $this->client->request('post', $uri, $options);
     }
 
-    protected static function getClient()
+    public function getClient()
     {
-        if (self::$client) {
-            return self::$client;
-        }
+        return $this->client;
+    }
 
-        return self::$client = new Client(['cookies' => true]);
+    public function setClient(HttpClient $client)
+    {
+        $this->client = $client;
     }
 
     public function setCookies($cookie)

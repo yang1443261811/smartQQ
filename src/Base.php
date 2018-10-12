@@ -1,11 +1,9 @@
 <?php
 namespace smartQQ;
 
-use smartQQ\Core\Api;
 
 class Base
 {
-    protected $http;
 
     protected $tokens;
 
@@ -15,7 +13,6 @@ class Base
 
     public function __construct()
     {
-        $this->http = new Api;
     }
 
     protected function setToken($name, $value)
