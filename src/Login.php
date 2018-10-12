@@ -57,19 +57,20 @@ class Login extends Base
             $pSessionId,
             $uin,
             self::$clientId,
-            $this->http->getCookies()
+            $this->client->http->getCookies()
         );
     }
 
     protected function getPtWebQQ($uri)
     {
-        $this->http->get($uri);
+        $this->client->http->get($uri);
 
-        foreach ($this->http->getCookies() as $cookie) {
+        foreach ($this->client->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'ptwebqq')) {
                 return $cookie->getValue();
             }
         }
+
         throw new LoginException('Can not find parameter [ptwebqq]');
     }
 
@@ -82,7 +83,7 @@ class Login extends Base
             'Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1',
         ];
 
-        $response = $this->http->get($uri, $options)->getBody();
+        $response = $this->client->http->get($uri, $options)->getBody();
         $body = json_decode($response, true);
 
         if (isset($body['result']) && !empty($body['result']['vfwebqq'])) {
@@ -106,7 +107,7 @@ class Login extends Base
             'Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'
         );
 
-        $response = $this->http->post('http://d1.web2.qq.com/channel/login2', $options)->getBody();
+        $response = $this->client->http->post('http://d1.web2.qq.com/channel/login2', $options)->getBody();
         $body = json_decode($response, true);
 
         if (isset($body['result']) &&
@@ -126,10 +127,10 @@ class Login extends Base
      */
     protected function makeQrCodeImg()
     {
-        $this->http->setCookies(new CookieJar());
-        $response = $this->http->get(self::GET_QR_CODE);
+        $this->client->http->setCookies(new CookieJar());
+        $response = $this->client->http->get(self::GET_QR_CODE);
 
-        foreach ($this->http->getCookies() as $cookie) {
+        foreach ($this->client->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'qrsig')) {
                 $qrsig = $cookie->getValue();
                 $this->tokens['ptqrtoken'] = static::hash33($qrsig);
@@ -148,7 +149,7 @@ class Login extends Base
     protected function getQcCodeStatus()
     {
         $uri = $this->processUri(self::GET_QR_CODE_STATUS);
-        $text = $this->http->get($uri)->getBody();
+        $text = $this->client->http->get($uri)->getBody();
         switch (true) {
             case (false !== strpos($text, '未失效')):
                 return 1;

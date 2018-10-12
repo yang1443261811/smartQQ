@@ -3,6 +3,7 @@
 namespace smartQQ\Core;
 
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
 
 class Identification
 {
@@ -75,14 +76,19 @@ class Identification
      */
     protected function decode()
     {
-        $identity = file_get_contents('./identity.json');
-        $identity = json_decode($identity);
-
-        foreach ($identity as $name => $value) {
+        $data = json_decode(file_get_contents('./identity.json'), true);
+        foreach ($data as $name => $value) {
             $this->$name = $value;
         }
 
-//        return $identity;
+        if (isset($data['cookies'])) {
+            $this->cookies = new CookieJar();
+            foreach ($data['cookies'] as $cookie) {
+                $this->cookies->setCookie(new SetCookie($cookie));
+            }
+        }
+
+
     }
 
     /**
@@ -113,12 +119,12 @@ class Identification
     public function toArray()
     {
         return [
-            'ptWebQQ' => $this->ptWebQQ,
-            'vfWebQQ' => $this->vfWebQQ,
+            'ptWebQQ'    => $this->ptWebQQ,
+            'vfWebQQ'    => $this->vfWebQQ,
             'pSessionId' => $this->pSessionId,
-            'uin' => $this->uin,
-            'clientId' => $this->clientId,
-//            'cookies' => $this->cookies->toArray(),
+            'uin'        => $this->uin,
+            'clientId'   => $this->clientId,
+            'cookies'    => $this->cookies->toArray(),
         ];
     }
 
