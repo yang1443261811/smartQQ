@@ -119,12 +119,12 @@ class Identification
     public function toArray()
     {
         return [
-            'ptWebQQ'    => $this->ptWebQQ,
-            'vfWebQQ'    => $this->vfWebQQ,
-            'pSessionId' => $this->pSessionId,
-            'uin'        => $this->uin,
-            'clientId'   => $this->clientId,
-            'cookies'    => $this->cookies->toArray(),
+            'ptWebQQ'   => $this->ptWebQQ,
+            'vfWebQQ'   => $this->vfWebQQ,
+            'pSessionId'=> $this->pSessionId,
+            'uin'       => $this->uin,
+            'clientId'  => $this->clientId,
+            'cookies'   => $this->cookies->toArray(),
         ];
     }
 
