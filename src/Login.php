@@ -3,6 +3,7 @@ namespace smartQQ;
 
 use GuzzleHttp\Cookie\CookieJar;
 use smartQQ\Exception\LoginException;
+use smartQQ\Core\Identification;
 
 class Login extends Base
 {
@@ -39,7 +40,17 @@ class Login extends Base
 
         $ptWebQQ = $this->getPtWebQQ($this->certificationUrl);
         $vfWebQQ = $this->getVfWebQQ($ptWebQQ);
-        list($uin, $psessionid) = $this->getUinAndPSessionId($ptWebQQ);
+        list($uin, $pSessionId) = $this->getUinAndPSessionId($ptWebQQ);
+
+        //持久化登陆信息
+        (new Identification())->store(
+            $ptWebQQ,
+            $vfWebQQ,
+            $pSessionId,
+            $uin,
+            self::$clientId,
+            $this->http->getCookies()
+        );
     }
 
     protected function getPtWebQQ($uri)
@@ -84,7 +95,7 @@ class Login extends Base
 
         $options = array(
             'form_params' => $params,
-            'Referer'     => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'
+            'Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'
         );
 
         $response = $this->http->post('http://d1.web2.qq.com/channel/login2', $options)->getBody();
@@ -92,8 +103,8 @@ class Login extends Base
 
         if (isset($body['result']) &&
             !empty($body['result']['uin']) &&
-            !empty($body['result']['psessionid'])) {
-
+            !empty($body['result']['psessionid'])
+        ) {
             return array($body['result']['uin'], $body['result']['psessionid']);
         }
 

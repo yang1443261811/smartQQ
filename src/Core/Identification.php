@@ -48,7 +48,54 @@ class Identification
      */
     protected $cookies;
 
-    public function __construct($ptWebQQ, $vfWebQQ, $pSessionId, $uin, $clientId, CookieJar $cookies)
+    /**
+     * Identification constructor.
+     */
+    public function __construct()
+    {
+        if ($this->isExist()) {
+            $this->decode();
+        }
+    }
+
+    /**
+     * 身份认证信息是否存在
+     *
+     * @return bool
+     */
+    public function isExist()
+    {
+        return file_exists('./identity.json');
+    }
+
+    /**
+     * 获取身份认证信息并解码
+     *
+     * @return array
+     */
+    protected function decode()
+    {
+        $identity = file_get_contents('./identity.json');
+        $identity = json_decode($identity);
+
+        foreach ($identity as $name => $value) {
+            $this->$name = $value;
+        }
+
+        return $identity;
+    }
+
+    /**
+     * 保存身份认证信息
+     *
+     * @param $ptWebQQ
+     * @param $vfWebQQ
+     * @param $pSessionId
+     * @param $uin
+     * @param $clientId
+     * @param CookieJar $cookies
+     */
+    public function store($ptWebQQ, $vfWebQQ, $pSessionId, $uin, $clientId, CookieJar $cookies)
     {
         $this->ptWebQQ = $ptWebQQ;
         $this->vfWebQQ = $vfWebQQ;
@@ -75,13 +122,52 @@ class Identification
         ];
     }
 
-    public function __get($name)
+    /**
+     * @return string
+     */
+    public function getPtWebQQ()
     {
-        return $this->$name;
+        return $this->ptWebQQ;
     }
 
-    public function __set($name, $value)
+    /**
+     * @return string
+     */
+    public function getVfWebQQ()
     {
-        $this->$name = $value;
+        return $this->vfWebQQ;
     }
+
+    /**
+     * @return string
+     */
+    public function getPSessionId()
+    {
+        return $this->pSessionId;
+    }
+
+    /**
+     * @return CookieJar
+     */
+    public function getCookies()
+    {
+        return $this->cookies;
+    }
+
+    /**
+     * @return int
+     */
+    public function getClientId()
+    {
+        return $this->clientId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUin()
+    {
+        return $this->uin;
+    }
+
 }
