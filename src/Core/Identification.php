@@ -87,8 +87,6 @@ class Identification
                 $this->cookies->setCookie(new SetCookie($cookie));
             }
         }
-
-
     }
 
     /**
