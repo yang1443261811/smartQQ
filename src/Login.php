@@ -3,7 +3,7 @@ namespace smartQQ;
 
 use GuzzleHttp\Cookie\CookieJar;
 use smartQQ\Exception\LoginException;
-use smartQQ\Core\Identification;
+use smartQQ\Core\Client;
 
 class Login extends Base
 {
@@ -16,12 +16,20 @@ class Login extends Base
      */
     protected static $clientId = 53999199;
 
+    protected $client;
+
+    public function __construct(Client $client)
+    {
+        parent::__construct();
+        $this->client = $client;
+    }
+
     /**
      * 执行登陆
      *
      * @return void
      */
-    public function exec()
+    public function server()
     {
         $this->makeQrCodeImg();
         echo "请扫码登陆";
@@ -43,7 +51,7 @@ class Login extends Base
         list($uin, $pSessionId) = $this->getUinAndPSessionId($ptWebQQ);
 
         //持久化登陆信息
-        (new Identification())->store(
+        $this->client->identification->store(
             $ptWebQQ,
             $vfWebQQ,
             $pSessionId,
