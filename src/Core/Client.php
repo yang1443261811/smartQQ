@@ -8,6 +8,7 @@ class Client extends Container
     protected $providers = [
         ServiceProviders\HttpServiceProvider::class,
         ServiceProviders\LoginServiceProvider::class,
+        ServiceProviders\MessageServiceProvider::class,
         ServiceProviders\IdentificationServiceProvider::class
     ];
 
