@@ -3,7 +3,6 @@ use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Cookie\CookieJar;
 use smartQQ\Console\QrCode;
 
-//header("Content-type: image/jpeg");
 require '../vendor/autoload.php';
 
 class Client
@@ -34,14 +33,14 @@ class Client
 
     public function login()
     {
-        while(true) {
+        while (true) {
             $status = $this->getQcCodeStatus();
             if ($status == 4) {
                 echo '登录成功';
                 echo $this->certificationUrl;
                 break;
             } else {
-                echo '请扫码';
+                echo $status;
             }
 
             usleep(1000);
@@ -62,7 +61,7 @@ class Client
 
         $a = $response->getBody();
         $str = "data:image/jpeg;base64," . base64_encode($a);
-        echo '<img src="'.$str.'"  alt="点击更换" title="点击更换" />';
+        echo '<img src="' . $str . '"  alt="点击更换" title="点击更换" />';
     }
 
     public function getQcCodeStatus()
