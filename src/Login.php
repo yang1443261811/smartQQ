@@ -31,21 +31,28 @@ class Login extends Base
      */
     public function server()
     {
-        $this->makeQrCodeImg();
-        echo "请扫码登陆";
-        while (true) {
-            $status = $this->getQcCodeStatus();
-            if ($status == 4) {
-                echo "\r\n登陆成功";
-                break;
-            } elseif ($status == 2) {
-                $this->makeQrCodeImg();
-                echo "\r\n二维码失效,请重新扫码";
-            }
-            sleep(1);
-            echo '.';
-        }
+//        $this->makeQrCodeImg();
+//        echo "请扫码登陆";
+//        while (true) {
+//            $status = $this->getQcCodeStatus();
+//            if ($status == 4) {
+//                echo "\r\n登陆成功";
+//                break;
+//            } elseif ($status == 2) {
+//                $this->makeQrCodeImg();
+//                echo "\r\n二维码失效,请重新扫码";
+//            }
+//            sleep(1);
+//            echo '.';
+//        }
+//
+//        $this->init();
 
+        $this->client->message->listen();
+    }
+
+    protected function init()
+    {
         $ptWebQQ = $this->getPtWebQQ($this->certificationUrl);
         $vfWebQQ = $this->getVfWebQQ($ptWebQQ);
         list($uin, $pSessionId) = $this->getUinAndPSessionId($ptWebQQ);
@@ -104,7 +111,7 @@ class Login extends Base
 
         $options = array(
             'form_params' => $params,
-            'Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'
+            'headers'     => [ 'Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']
         );
 
         $response = $this->client->http->post('http://d1.web2.qq.com/channel/login2', $options)->getBody();
