@@ -3,6 +3,12 @@ namespace smartQQ\Core;
 
 use Pimple\Container;
 
+/**
+ * @property \smartQQ\Core\Http $http
+ * @property \smartQQ\Core\Identification $identification
+ * @property \smartQQ\Core\MessageHandler $message
+ * @property \smartQQ\Login $login
+ */
 class Client extends Container
 {
     protected $providers = [
