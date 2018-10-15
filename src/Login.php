@@ -31,7 +31,34 @@ class Login extends Base
      */
     public function server()
     {
-        $this->makeQrCodeImg();
+        if (!$this->tryLogin()) {
+            $this->makeQrCodeImg();
+            $this->waitForLogin();
+            $this->init();
+        }
+
+        $this->client->message->listen();
+    }
+
+    public function tryLogin()
+    {
+        if (!$this->client->identification->isExist()) {
+            return false;
+        }
+
+        if (!$response = $this->client->message->pollMessage()) {
+            return false;
+        }
+
+        if (false !== strpos($response['retmsg'], 'login error')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function waitForLogin()
+    {
         echo "请扫码登陆";
         while (true) {
             $status = $this->getQcCodeStatus();
@@ -45,12 +72,7 @@ class Login extends Base
             sleep(1);
             echo '.';
         }
-
-        $this->init();
-
-        $this->client->message->listen();
     }
-
     protected function init()
     {
         $ptWebQQ = $this->getPtWebQQ($this->certificationUrl);
