@@ -22,7 +22,9 @@ class MessageHandler
     public function listen()
     {
         while (true) {
-            $this->pollMessage();
+            $response = $this->pollMessage();
+
+            call_user_func_array($this->handler, [$response]);
 
             sleep(1);
         }
@@ -36,17 +38,13 @@ class MessageHandler
             'psessionid' => $this->client->identification->getPSessionId(),
             'key'        => '',
         ]);
-
         $options = array(
             'form_params' => $params,
             'headers'     => [ 'Referer' => $this->referer]
         );
-//        print_r($options);die;
-
         $this->client->http->setCookies($this->client->identification->getCookies());
-
         $body = $this->client->http->post($this->uri, $options)->getBody();
-        echo $body;
+        return $body ? json_decode($body, true) : '';
     }
 
     public function handleMessage($text)
