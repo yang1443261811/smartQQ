@@ -12,5 +12,5 @@ $client->message->setHandler(function ($msg) {
     print_r($msg);
 });
 
-$client->login->server();
+$client->server->server();
 

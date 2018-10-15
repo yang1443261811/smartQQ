@@ -5,17 +5,17 @@ use Pimple\Container;
 
 /**
  * @property \smartQQ\Core\Http $http
- * @property \smartQQ\Core\Identification $identification
+ * @property \smartQQ\Core\Credential $credential
  * @property \smartQQ\Core\MessageHandler $message
- * @property \smartQQ\Login $login
+ * @property \smartQQ\Core\Server $server
  */
 class Client extends Container
 {
     protected $providers = [
         ServiceProviders\HttpServiceProvider::class,
-        ServiceProviders\LoginServiceProvider::class,
+        ServiceProviders\ServerServiceProvider::class,
         ServiceProviders\MessageServiceProvider::class,
-        ServiceProviders\IdentificationServiceProvider::class
+        ServiceProviders\CredentialServiceProvider::class
     ];
 
     public function __construct()

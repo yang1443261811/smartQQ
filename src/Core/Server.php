@@ -1,13 +1,15 @@
 <?php
-namespace smartQQ;
+
+namespace smartQQ\Core;
 
 use GuzzleHttp\Cookie\CookieJar;
 use smartQQ\Exception\LoginException;
-use smartQQ\Core\Client;
 
-class Login extends Base
+class Server
 {
     protected $certificationUrl;
+
+    protected $ptqrtoken;
 
     /**
      * 客户端id(固定值).
@@ -20,7 +22,6 @@ class Login extends Base
 
     public function __construct(Client $client)
     {
-        parent::__construct();
         $this->client = $client;
     }
 
@@ -42,7 +43,7 @@ class Login extends Base
 
     public function tryLogin()
     {
-        if (!$this->client->identification->isExist()) {
+        if (!$this->client->credential->isExist()) {
             return false;
         }
 
@@ -56,6 +57,27 @@ class Login extends Base
 
         return true;
     }
+
+    /**
+     * 获取登陆二维码,并将二维码保存到本地
+     *
+     * @return void
+     */
+    protected function makeQrCodeImg()
+    {
+        $this->client->http->setCookies(new CookieJar());
+        $response = $this->client->http->get('https://ssl.ptlogin2.qq.com/ptqrshow?appid=501004106&e=0&l=M&s=5&d=72&v=4&t=0.1');
+
+        foreach ($this->client->http->getCookies() as $cookie) {
+            if (0 == strcasecmp($cookie->getName(), 'qrsig')) {
+                $qrsig = $cookie->getValue();
+                $this->ptqrtoken = static::hash33($qrsig);
+            }
+        }
+
+        file_put_contents('qrCode.png', $response->getBody());
+    }
+
 
     public function waitForLogin()
     {
@@ -80,7 +102,7 @@ class Login extends Base
         list($uin, $pSessionId) = $this->getUinAndPSessionId($ptWebQQ);
 
         //持久化登陆信息
-        $this->client->identification->store(
+        $this->client->credential->store(
             $ptWebQQ,
             $vfWebQQ,
             $pSessionId,
@@ -105,8 +127,7 @@ class Login extends Base
 
     protected function getVfWebQQ($ptWebQQ)
     {
-        $this->setToken('ptwebqq', $ptWebQQ);
-        $uri = $this->processUri(self::Get_VfWebQQ);
+        $uri = "http://s.web2.qq.com/api/getvfwebqq?ptwebqq={$ptWebQQ}&clientid=53999199&psessionid=&t=0.1";
 
         $options['headers'] = [
             'Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1',
@@ -150,26 +171,6 @@ class Login extends Base
     }
 
     /**
-     * 获取登陆二维码,并将二维码保存到本地
-     *
-     * @return void
-     */
-    protected function makeQrCodeImg()
-    {
-        $this->client->http->setCookies(new CookieJar());
-        $response = $this->client->http->get(self::GET_QR_CODE);
-
-        foreach ($this->client->http->getCookies() as $cookie) {
-            if (0 == strcasecmp($cookie->getName(), 'qrsig')) {
-                $qrsig = $cookie->getValue();
-                $this->tokens['ptqrtoken'] = static::hash33($qrsig);
-            }
-        }
-
-        file_put_contents('qrCode.png', $response->getBody());
-    }
-
-    /**
      * 获取登陆二维码的状态
      *
      * @return int
@@ -177,7 +178,7 @@ class Login extends Base
      */
     protected function getQcCodeStatus()
     {
-        $uri = $this->processUri(self::GET_QR_CODE_STATUS);
+        $uri = "https://ssl.ptlogin2.qq.com/ptqrlogin?ptqrtoken={$this->ptqrtoken}&webqq_type=10&remember_uin=1&login2qq=1&aid=501004106&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-4303&mibao_css=m_webqq&t=undefined&g=1&js_type=0&js_ver=10203&login_sig=&pt_randsalt=0";
         $text = $this->client->http->get($uri)->getBody();
         switch (true) {
             case (false !== strpos($text, '未失效')):
@@ -237,5 +238,4 @@ class Login extends Base
             return null;
         }
     }
-
 }

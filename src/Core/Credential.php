@@ -5,8 +5,9 @@ namespace smartQQ\Core;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SetCookie;
 
-class Identification
+class Credential
 {
+
     /**
      * 鉴权参数ptwebqq，存储在cookie中.
      *
@@ -117,12 +118,12 @@ class Identification
     public function toArray()
     {
         return [
-            'ptWebQQ'   => $this->ptWebQQ,
-            'vfWebQQ'   => $this->vfWebQQ,
-            'pSessionId'=> $this->pSessionId,
-            'uin'       => $this->uin,
-            'clientId'  => $this->clientId,
-            'cookies'   => $this->cookies->toArray(),
+            'ptWebQQ' => $this->ptWebQQ,
+            'vfWebQQ' => $this->vfWebQQ,
+            'pSessionId' => $this->pSessionId,
+            'uin' => $this->uin,
+            'clientId' => $this->clientId,
+            'cookies' => $this->cookies->toArray(),
         ];
     }
 
@@ -132,6 +133,11 @@ class Identification
     public function getPtWebQQ()
     {
         return $this->ptWebQQ;
+    }
+
+    public function setPtWebQQ($ptWebQQ)
+    {
+        $this->ptWebQQ = $ptWebQQ;
     }
 
     /**
@@ -173,5 +179,4 @@ class Identification
     {
         return $this->uin;
     }
-
 }

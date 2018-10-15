@@ -27,8 +27,6 @@ class Http
 
     public function post($uri, $options = array())
     {
-        $client = self::getClient();
-
         $options = array_merge([
             'verify'  => false,
             'cookies' => $this->cookies,
