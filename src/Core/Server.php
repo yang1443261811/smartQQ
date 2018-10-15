@@ -41,6 +41,11 @@ class Server
         $this->client->message->listen();
     }
 
+    /**
+     * 尝试登陆
+     *
+     * @return bool
+     */
     public function tryLogin()
     {
         if (!$this->client->credential->isExist()) {
@@ -78,7 +83,11 @@ class Server
         file_put_contents('qrCode.png', $response->getBody());
     }
 
-
+    /**
+     * 等待扫码登陆
+     *
+     * @return void
+     */
     public function waitForLogin()
     {
         echo "请扫码登陆";
@@ -95,6 +104,12 @@ class Server
             echo '.';
         }
     }
+
+    /**
+     * 获取登陆信息并保存
+     *
+     * @return void
+     */
     protected function init()
     {
         $ptWebQQ = $this->getPtWebQQ($this->certificationUrl);
@@ -112,6 +127,13 @@ class Server
         );
     }
 
+    /**
+     * 获取鉴权字段ptwebqq
+     *
+     * @param $uri
+     * @return mixed
+     * @throws LoginException
+     */
     protected function getPtWebQQ($uri)
     {
         $this->client->http->get($uri);
@@ -125,6 +147,13 @@ class Server
         throw new LoginException('Can not find parameter [ptwebqq]');
     }
 
+    /**
+     * 获取鉴权字段vfwebqq
+     *
+     * @param $ptWebQQ
+     * @return mixed
+     * @throws LoginException
+     */
     protected function getVfWebQQ($ptWebQQ)
     {
         $uri = "http://s.web2.qq.com/api/getvfwebqq?ptwebqq={$ptWebQQ}&clientid=53999199&psessionid=&t=0.1";
@@ -143,6 +172,13 @@ class Server
         throw new LoginException('Can not find parameter [vfwebqq]');
     }
 
+    /**
+     * 获取鉴权字段uin和psessionid
+     *
+     * @param $ptWebQQ
+     * @return array
+     * @throws LoginException
+     */
     protected function getUinAndPSessionId($ptWebQQ)
     {
         $params['r'] = json_encode([
