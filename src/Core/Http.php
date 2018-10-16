@@ -3,36 +3,59 @@
 namespace smartQQ\Core;
 
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Cookie\FileCookieJar;
 
 class Http
 {
     protected $client;
 
-    protected $cookies;
+    protected $cookieJar;
 
     public function __construct()
     {
-        $this->client = new HttpClient();
+        $this->cookieJar = new FileCookieJar('./cookie.txt', true);
+        $this->client = new HttpClient(['cookies' => $this->cookieJar]);
     }
 
     public function get($uri, $options = array())
     {
-        $options = array_merge([
-            'verify'  => false,
-            'cookies' => $this->cookies,
-        ], $options);
-
-        return $this->client->request('get', $uri, $options);
+        return $this->request($uri, 'GET', $options);
     }
 
-    public function post($uri, $options = array())
+    public function post($url, $options = [], $array = false)
     {
-        $options = array_merge([
-            'verify'  => false,
-            'cookies' => $this->cookies,
-        ], $options);
+        $content = $this->request($url, 'POST', $options);
 
-        return $this->client->request('post', $uri, $options);
+        return json_decode($content, true);
+    }
+
+    /**
+     * @param $url
+     * @param string $method
+     * @param array  $options
+     * @param bool   $retry
+     *
+     * @return string
+     */
+    public function request($url, $method = 'GET', $options = [], $retry = false)
+    {
+        try {
+            $options = array_merge(['timeout' => 10, 'verify' => false], $options);
+
+            $response = $this->getClient()->request($method, $url, $options);
+
+            $this->cookieJar->save('./cookie.txt');
+
+            return $response->getBody()->getContents();
+        } catch (\Exception $e) {
+//            $this->vbot->console->log($url.$e->getMessage(), Console::ERROR, true);
+
+            if (!$retry) {
+                return $this->request($url, $method, $options, true);
+            }
+
+            return false;
+        }
     }
 
     public function getClient()
@@ -47,11 +70,11 @@ class Http
 
     public function setCookies($cookie)
     {
-        $this->cookies = $cookie;
+        $this->cookieJar = $cookie;
     }
 
     public function getCookies()
     {
-        return $this->cookies;
+        return $this->cookieJar;
     }
 }

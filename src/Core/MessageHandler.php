@@ -33,18 +33,18 @@ class MessageHandler
     public function pollMessage()
     {
         $params['r'] = json_encode([
-            'ptwebqq'    => $this->client->credential->getPtWebQQ(),
-            'clientid'   => $this->client->credential->getClientId(),
-            'psessionid' => $this->client->credential->getPSessionId(),
+            'ptwebqq'    => $this->client->config['ptwebqq'],
+            'clientid'   => $this->client->config['clientid'],
+            'psessionid' => $this->client->config['psessionid'],
             'key'        => '',
         ]);
-        $options = array(
+
+        $result = $this->client->http->post($this->uri, [
             'form_params' => $params,
-            'headers'     => [ 'Referer' => $this->referer]
-        );
-        $this->client->http->setCookies($this->client->credential->getCookies());
-        $body = $this->client->http->post($this->uri, $options)->getBody();
-        return $body ? json_decode($body, true) : '';
+            'headers'     => ['Referer' => $this->referer]
+        ]);
+
+        return $result;
     }
 
     public function handleMessage($text)

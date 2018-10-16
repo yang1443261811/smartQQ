@@ -2,8 +2,9 @@
 use smartQQ\Core\Client;
 
 require '../vendor/autoload.php';
+require 'smartQQ.php';
 
-$client = new Client();
+$client = new Client($config);
 
 //$a = $client->identification->toArray();
 //print_r($client->identification->toArray());
