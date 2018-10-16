@@ -156,10 +156,13 @@ class Server
      */
     protected function getVfWebQQ()
     {
-        $uri = "http://s.web2.qq.com/api/getvfwebqq?ptwebqq={$this->client->config['ptwebqq']}&clientid=53999199&psessionid=&t=0.1";
-        $options = ['headers' => ['Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1']];
-        $response = $this->client->http->get($uri, $options);
+        $url = sprintf("http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=53999199&psessionid=&t=0.1", $this->client->config['ptwebqq']);
+        $response = $this->client->http->get($url, [
+            'headers' => ['Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1']
+        ]);
+
         $body = json_decode($response, true);
+
         if (empty($body['result']['vfwebqq'])) {
             throw new LoginException('Can not find parameter [vfwebqq]');
         }
