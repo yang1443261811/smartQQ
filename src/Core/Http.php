@@ -22,9 +22,9 @@ class Http
         return $this->request($uri, 'GET', $options);
     }
 
-    public function post($url, $options = [], $array = false)
+    public function post($uri, $options = [])
     {
-        $content = $this->request($url, 'POST', $options);
+        $content = $this->request($uri, 'POST', $options);
 
         return json_decode($content, true);
     }
@@ -40,16 +40,16 @@ class Http
     public function request($url, $method = 'GET', $options = [], $retry = false)
     {
         try {
-            $options = array_merge(['timeout' => 10, 'verify' => false], $options);
+            $options = array_merge(['verify' => false], $options);
 
             $response = $this->getClient()->request($method, $url, $options);
-
+//            print_r($response);die;
             $this->cookieJar->save('./cookie.txt');
 
             return $response->getBody()->getContents();
         } catch (\Exception $e) {
 //            $this->vbot->console->log($url.$e->getMessage(), Console::ERROR, true);
-
+//print_r($e->getMessage());die;
             if (!$retry) {
                 return $this->request($url, $method, $options, true);
             }

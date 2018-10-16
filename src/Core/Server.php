@@ -55,14 +55,6 @@ class Server
             $this->client->config[$key] = $val;
         }
 
-//        if (isset($config['cookies'])) {
-//            $cookieJar = new CookieJar();
-//            foreach ($config['cookies'] as $cookie) {
-//                $cookieJar->setCookie(new SetCookie($cookie));
-//            }
-//            $this->client->http->setCookies($cookieJar);
-//        }
-
         $response = $this->client->message->pollMessage();
 
         if (!$response ||
@@ -165,10 +157,7 @@ class Server
     protected function getVfWebQQ()
     {
         $uri = "http://s.web2.qq.com/api/getvfwebqq?ptwebqq={$this->client->config['ptwebqq']}&clientid=53999199&psessionid=&t=0.1";
-
-        $options = array(
-            'headers' => ['Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'],
-        );
+        $options = ['headers' => ['Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1']];
         $response = $this->client->http->get($uri, $options);
         $body = json_decode($response, true);
         if (empty($body['result']['vfwebqq'])) {
