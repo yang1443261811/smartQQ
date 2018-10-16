@@ -2,12 +2,14 @@
 namespace smartQQ\Core;
 
 use Pimple\Container;
+use Illuminate\Config\Repository;
 
 /**
  * @property \smartQQ\Core\Http $http
  * @property \smartQQ\Core\Credential $credential
  * @property \smartQQ\Core\MessageHandler $message
  * @property \smartQQ\Core\Server $server
+ * @property \Illuminate\Config\Repository $config
  */
 class Client extends Container
 {
@@ -18,11 +20,18 @@ class Client extends Container
         ServiceProviders\CredentialServiceProvider::class
     ];
 
-    public function __construct()
+    public function __construct($config = [])
     {
+        $this->initializeConfig($config);
+
         $this->registerProviders();
 
         (new Kernel($this))->bootstrap();
+    }
+
+    private function initializeConfig(array $config)
+    {
+        $this->config = new Repository($config);
     }
 
     public function registerProviders()

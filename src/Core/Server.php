@@ -3,14 +3,11 @@
 namespace smartQQ\Core;
 
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
 use smartQQ\Exception\LoginException;
 
 class Server
 {
-    protected $certificationUrl;
-
-    protected $ptqrtoken;
-
     /**
      * 客户端id(固定值).
      *
@@ -48,15 +45,28 @@ class Server
      */
     public function tryLogin()
     {
-        if (!$this->client->credential->isExist()) {
+        if (!is_file($this->client->config['credential_file'])) {
             return false;
         }
 
-        if (!$response = $this->client->message->pollMessage()) {
-            return false;
+        $config = json_decode(file_get_contents($this->client->config['credential_file']), true);
+
+        foreach ($config as $key => $val) {
+            $this->client->config[$key] = $val;
         }
 
-        if (false !== strpos($response['retmsg'], 'login error')) {
+//        if (isset($config['cookies'])) {
+//            $cookieJar = new CookieJar();
+//            foreach ($config['cookies'] as $cookie) {
+//                $cookieJar->setCookie(new SetCookie($cookie));
+//            }
+//            $this->client->http->setCookies($cookieJar);
+//        }
+
+        $response = $this->client->message->pollMessage();
+
+        if (!$response ||
+            strpos($response['retmsg'], 'login error') !== false) {
             return false;
         }
 
@@ -70,17 +80,16 @@ class Server
      */
     protected function makeQrCodeImg()
     {
-        $this->client->http->setCookies(new CookieJar());
         $response = $this->client->http->get('https://ssl.ptlogin2.qq.com/ptqrshow?appid=501004106&e=0&l=M&s=5&d=72&v=4&t=0.1');
 
         foreach ($this->client->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'qrsig')) {
                 $qrsig = $cookie->getValue();
-                $this->ptqrtoken = static::hash33($qrsig);
+                $this->client->config['ptqrtoken'] = static::hash33($qrsig);
             }
         }
 
-        file_put_contents('qrCode.png', $response->getBody());
+        file_put_contents('qrCode.png', $response);
     }
 
     /**
@@ -112,35 +121,35 @@ class Server
      */
     protected function init()
     {
-        $ptWebQQ = $this->getPtWebQQ($this->certificationUrl);
-        $vfWebQQ = $this->getVfWebQQ($ptWebQQ);
-        list($uin, $pSessionId) = $this->getUinAndPSessionId($ptWebQQ);
+        $this->getPtWebQQ();
+        $this->getVfWebQQ();
+        $this->getUinAndPSessionId();
 
         //持久化登陆信息
-        $this->client->credential->store(
-            $ptWebQQ,
-            $vfWebQQ,
-            $pSessionId,
-            $uin,
-            self::$clientId,
-            $this->client->http->getCookies()
-        );
+        $cookieJar = $this->client->http->getCookies();
+        $credential = $this->client->config->getMany(['ptwebqq', 'vfwebqq', 'psessionid', 'uin']);
+        $credential = array_merge($credential, [
+            'clientid' => self::$clientId,
+            'cookies'  => $cookieJar->toArray()
+        ]);
+
+        file_put_contents($this->client->config['credential_file'], json_encode($credential));
     }
 
     /**
      * 获取鉴权字段ptwebqq
      *
-     * @param $uri
-     * @return mixed
+     * @return void
      * @throws LoginException
      */
-    protected function getPtWebQQ($uri)
+    protected function getPtWebQQ()
     {
-        $this->client->http->get($uri);
+        $this->client->http->get($this->client->config['certificationUrl']);
 
         foreach ($this->client->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'ptwebqq')) {
-                return $cookie->getValue();
+                $this->client->config['ptwebqq'] = $cookie->getValue();
+                return;
             }
         }
 
@@ -150,60 +159,53 @@ class Server
     /**
      * 获取鉴权字段vfwebqq
      *
-     * @param $ptWebQQ
-     * @return mixed
+     * @return void
      * @throws LoginException
      */
-    protected function getVfWebQQ($ptWebQQ)
+    protected function getVfWebQQ()
     {
-        $uri = "http://s.web2.qq.com/api/getvfwebqq?ptwebqq={$ptWebQQ}&clientid=53999199&psessionid=&t=0.1";
+        $uri = "http://s.web2.qq.com/api/getvfwebqq?ptwebqq={$this->client->config['ptwebqq']}&clientid=53999199&psessionid=&t=0.1";
 
-        $options['headers'] = [
-            'Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1',
-        ];
-
-        $response = $this->client->http->get($uri, $options)->getBody();
+        $options = array(
+            'headers' => ['Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'],
+        );
+        $response = $this->client->http->get($uri, $options);
         $body = json_decode($response, true);
-
-        if (isset($body['result']) && !empty($body['result']['vfwebqq'])) {
-            return $body['result']['vfwebqq'];
+        if (empty($body['result']['vfwebqq'])) {
+            throw new LoginException('Can not find parameter [vfwebqq]');
         }
 
-        throw new LoginException('Can not find parameter [vfwebqq]');
+        $this->client->config['vfwebqq'] = $body['result']['vfwebqq'];
+
     }
 
     /**
      * 获取鉴权字段uin和psessionid
      *
-     * @param $ptWebQQ
-     * @return array
+     * @return void
      * @throws LoginException
      */
-    protected function getUinAndPSessionId($ptWebQQ)
+    protected function getUinAndPSessionId()
     {
         $params['r'] = json_encode([
             'psessionid' => '',
             'status'     => 'online',
-            'ptwebqq'    => $ptWebQQ,
+            'ptwebqq'    => $this->client->config['ptwebqq'],
             'clientid'   => static::$clientId,
         ]);
 
-        $options = array(
+        $body = $this->client->http->post('http://d1.web2.qq.com/channel/login2', [
             'form_params' => $params,
-            'headers'     => [ 'Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']
-        );
+            'headers'     => ['Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']
+        ]);
 
-        $response = $this->client->http->post('http://d1.web2.qq.com/channel/login2', $options);
-        $body = json_decode($response->getBody(), true);
-
-        if (isset($body['result']) &&
-            !empty($body['result']['uin']) &&
-            !empty($body['result']['psessionid'])
-        ) {
-            return array($body['result']['uin'], $body['result']['psessionid']);
+        if (empty($body['result']['uin']) || empty($body['result']['psessionid'])) {
+            throw new LoginException('Can not find parameter [uin and psessionid]');
         }
 
-        throw new LoginException('Can not find parameter [uin and psessionid]');
+        $this->client->config['uin'] = $body['result']['uin'];
+        $this->client->config['psessionid'] = $body['result']['psessionid'];
+
     }
 
     /**
@@ -214,8 +216,8 @@ class Server
      */
     protected function getQcCodeStatus()
     {
-        $uri = "https://ssl.ptlogin2.qq.com/ptqrlogin?ptqrtoken={$this->ptqrtoken}&webqq_type=10&remember_uin=1&login2qq=1&aid=501004106&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-4303&mibao_css=m_webqq&t=undefined&g=1&js_type=0&js_ver=10203&login_sig=&pt_randsalt=0";
-        $text = $this->client->http->get($uri)->getBody();
+        $uri = "https://ssl.ptlogin2.qq.com/ptqrlogin?ptqrtoken={$this->client->config['ptqrtoken']}&webqq_type=10&remember_uin=1&login2qq=1&aid=501004106&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-4303&mibao_css=m_webqq&t=undefined&g=1&js_type=0&js_ver=10203&login_sig=&pt_randsalt=0";
+        $text = $this->client->http->get($uri);
         switch (true) {
             case (false !== strpos($text, '未失效')):
                 return 1;
@@ -226,7 +228,7 @@ class Server
             default:
                 //找出认证url
                 if (preg_match("#'(http.+)'#U", strval($text), $matches)) {
-                    $this->certificationUrl = trim($matches[1]);
+                    $this->client->config['certificationUrl'] = trim($matches[1]);
                     return 4;
                 }
                 throw new LoginException('Can not find certification url');
