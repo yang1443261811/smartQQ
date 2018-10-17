@@ -1,17 +1,17 @@
 <?php
-use smartQQ\Core\Client;
+use smartQQ\Core\App;
 
 require '../vendor/autoload.php';
 require 'smartQQ.php';
 
-$client = new Client($config);
+$app = new App($config);
 
 //$a = $client->identification->toArray();
 //print_r($client->identification->toArray());
 
-$client->message->setHandler(function ($msg) {
+$app->message->setHandler(function ($msg) {
     print_r($msg);
 });
 
-$client->server->server();
+$app->server->server();
 

@@ -10,7 +10,8 @@
         "guzzlehttp/guzzle": "^6.3",
         "symfony/console": "^4.1",
         "aferrandini/phpqrcode": "^1.0",
-        "pimple/pimple": "^3.0"
+        "pimple/pimple": "^3.0",
+        "illuminate/config": "^5.7"
     },
     "autoload": {
         "psr-4": {

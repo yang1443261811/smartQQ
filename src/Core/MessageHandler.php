@@ -6,7 +6,7 @@ use smartQQ\Exception\ArgumentException;
 
 class MessageHandler
 {
-    protected $client;
+    protected $app;
 
     protected $handler;
 
@@ -14,9 +14,9 @@ class MessageHandler
 
     protected $referer = 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2';
 
-    public function __construct(Client $client)
+    public function __construct(App $app)
     {
-        $this->client = $client;
+        $this->app = $app;
     }
 
     public function listen()
@@ -33,13 +33,13 @@ class MessageHandler
     public function pollMessage()
     {
         $params['r'] = json_encode([
-            'ptwebqq'    => $this->client->config['ptwebqq'],
-            'clientid'   => $this->client->config['clientid'],
-            'psessionid' => $this->client->config['psessionid'],
+            'ptwebqq'    => $this->app->config['ptwebqq'],
+            'clientid'   => $this->app->config['clientid'],
+            'psessionid' => $this->app->config['psessionid'],
             'key'        => '',
         ]);
 
-        $result = $this->client->http->post($this->uri, [
+        $result = $this->app->http->post($this->uri, [
             'form_params' => $params,
             'headers'     => ['Referer' => $this->referer]
         ]);
