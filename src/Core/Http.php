@@ -25,8 +25,12 @@ class Http
         return $this->request($uri, 'GET', $options);
     }
 
-    public function post($uri, $options = [])
+    public function post($uri, $params = [], $options = [])
     {
+        $data = array('form_params' => ['r' => json_encode($params)]);
+
+        $options = array_merge($data, $options);
+
         $content = $this->request($uri, 'POST', $options);
 
         return json_decode($content, true);

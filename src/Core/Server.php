@@ -25,7 +25,6 @@ class Server
             $this->waitForLogin();
             $this->init();
         }
-
         $this->app->message->listen();
     }
 
@@ -41,15 +40,12 @@ class Server
         }
 
         $config = json_decode(file_get_contents($this->app->config['credential_file']), true);
-
         foreach ($config as $key => $val) {
             $this->app->config[$key] = $val;
         }
 
         $response = $this->app->message->pollMessage();
-
-        if (!$response ||
-            strpos($response['retmsg'], 'login error') !== false) {
+        if (!$response || strpos($response['retmsg'], 'login error') !== false) {
             return false;
         }
 
@@ -107,15 +103,14 @@ class Server
         $this->getPtWebQQ();
         $this->getVfWebQQ();
         $this->getUinAndPSessionId();
-
         //持久化登陆信息
-        $cookieJar = $this->app->http->getCookies();
-        $credential = $this->app->config->getMany(['ptwebqq', 'vfwebqq', 'psessionid', 'uin', '53999199']);
-        $credential = array_merge($credential, [
-            'cookies'  => $cookieJar->toArray()
+        $credential = json_encode([
+            'ptwebqq'    => $this->app->config['ptwebqq'],
+            'vfwebqq'    => $this->app->config['vfwebqq'],
+            'psessionid' => $this->app->config['psessionid'],
+            'uin'        => $this->app->config['uin'],
         ]);
-
-        file_put_contents($this->app->config['credential_file'], json_encode($credential));
+        file_put_contents($this->app->config['credential_file'], $credential);
     }
 
     /**
@@ -147,10 +142,9 @@ class Server
     protected function getVfWebQQ()
     {
         $url = sprintf("http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=53999199&psessionid=&t=0.1", $this->app->config['ptwebqq']);
-        $response = $this->app->http->get($url, [
-            'headers' => ['Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1']
-        ]);
+        $options = array('headers' => ['Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1']);
 
+        $response = $this->app->http->get($url, $options);
         $body = json_decode($response, true);
 
         if (empty($body['result']['vfwebqq'])) {
@@ -168,17 +162,13 @@ class Server
      */
     protected function getUinAndPSessionId()
     {
-        $params['r'] = json_encode([
+        $options = array('headers' => ['Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']);
+        $body = $this->app->http->post('http://d1.web2.qq.com/channel/login2', [
             'psessionid' => '',
             'status'     => 'online',
             'ptwebqq'    => $this->app->config['ptwebqq'],
             'clientid'   => $this->app->config['clientid'],
-        ]);
-
-        $body = $this->app->http->post('http://d1.web2.qq.com/channel/login2', [
-            'form_params' => $params,
-            'headers'     => ['Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']
-        ]);
+        ], $options);
 
         if (empty($body['result']['uin']) || empty($body['result']['psessionid'])) {
             throw new LoginException('Can not find parameter [uin and psessionid]');
