@@ -9,11 +9,14 @@ class Http
 {
     protected $client;
 
+    protected $app;
+
     protected $cookieJar;
 
-    public function __construct()
+    public function __construct(App $app)
     {
-        $this->cookieJar = new FileCookieJar('./cookie.txt', true);
+        $this->app = $app;
+        $this->cookieJar = new FileCookieJar($this->app->config['cookie_file'], true);
         $this->client = new HttpClient(['cookies' => $this->cookieJar]);
     }
 
@@ -43,13 +46,13 @@ class Http
             $options = array_merge(['verify' => false], $options);
 
             $response = $this->getClient()->request($method, $url, $options);
-//            print_r($response);die;
-            $this->cookieJar->save('./cookie.txt');
+
+            $this->cookieJar->save($this->app->config['cookie_file']);
 
             return $response->getBody()->getContents();
         } catch (\Exception $e) {
 //            $this->vbot->console->log($url.$e->getMessage(), Console::ERROR, true);
-//print_r($e->getMessage());die;
+
             if (!$retry) {
                 return $this->request($url, $method, $options, true);
             }

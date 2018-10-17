@@ -11,7 +11,7 @@ use Illuminate\Config\Repository;
  * @property \smartQQ\Core\Server $server
  * @property \Illuminate\Config\Repository $config
  */
-class Client extends Container
+class App extends Container
 {
     protected $providers = [
         ServiceProviders\HttpServiceProvider::class,

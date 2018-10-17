@@ -11,7 +11,7 @@ class HttpServiceProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['http'] = function ($pimple) {
-            return new Http();
+            return new Http($pimple);
         };
     }
 }
