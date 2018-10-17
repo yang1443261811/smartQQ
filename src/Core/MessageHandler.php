@@ -10,10 +10,6 @@ class MessageHandler
 
     protected $handler;
 
-    protected $uri = 'http://d1.web2.qq.com/channel/poll2';
-
-    protected $referer = 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2';
-
     public function __construct(App $app)
     {
         $this->app = $app;
@@ -32,17 +28,14 @@ class MessageHandler
 
     public function pollMessage()
     {
-        $params['r'] = json_encode([
+        $options = array('headers' => ['Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']);
+
+        $result = $this->app->http->post('http://d1.web2.qq.com/channel/poll2', [
             'ptwebqq'    => $this->app->config['ptwebqq'],
             'clientid'   => $this->app->config['clientid'],
             'psessionid' => $this->app->config['psessionid'],
-            'key'        => '',
-        ]);
-
-        $result = $this->app->http->post($this->uri, [
-            'form_params' => $params,
-            'headers'     => ['Referer' => $this->referer]
-        ]);
+            'key' => '',
+        ], $options);
 
         return $result;
     }
@@ -55,7 +48,7 @@ class MessageHandler
     public function setHandler($callback)
     {
         if (!is_callable($callback)) {
-            throw new ArgumentException('Argument must be callable in '.get_class());
+            throw new ArgumentException('Argument must be callable in ' . get_class());
         }
 
         $this->handler = $callback;
