@@ -1,6 +1,6 @@
 <?php
 
-namespace smartQQ\Core;
+namespace smartQQ\Support;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Cookie\FileCookieJar;
