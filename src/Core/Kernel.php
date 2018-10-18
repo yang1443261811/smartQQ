@@ -6,7 +6,7 @@ class Kernel
 {
     protected $client;
 
-    public function __construct(Client $client)
+    public function __construct(App $client)
     {
         $this->client = $client;
 
