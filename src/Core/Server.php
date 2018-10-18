@@ -25,6 +25,7 @@ class Server
             $this->waitForLogin();
             $this->init();
         }
+
         $this->app->message->listen();
     }
 
@@ -105,11 +106,12 @@ class Server
         $this->getUinAndPSessionId();
         //持久化登陆信息
         $credential = json_encode([
+            'uin'        => $this->app->config['uin'],
             'ptwebqq'    => $this->app->config['ptwebqq'],
             'vfwebqq'    => $this->app->config['vfwebqq'],
             'psessionid' => $this->app->config['psessionid'],
-            'uin'        => $this->app->config['uin'],
         ]);
+
         file_put_contents($this->app->config['credential_file'], $credential);
     }
 
