@@ -40,7 +40,8 @@ class Kernel
     {
         $config = $this->app->config['log'];
 
-        $this->app->log->pushHandler(new StreamHandler(
+        $this->app->log->pushHandler(
+            new StreamHandler(
             $config['system'],
             $config['level'],
             true,
