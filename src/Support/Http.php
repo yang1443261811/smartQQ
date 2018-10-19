@@ -2,6 +2,7 @@
 
 namespace smartQQ\Support;
 
+use smartQQ\Core\App;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Cookie\FileCookieJar;
 
@@ -54,7 +55,7 @@ class Http
 
             return $response->getBody()->getContents();
         } catch (\Exception $e) {
-//            $this->vbot->console->log($url.$e->getMessage(), Console::ERROR, true);
+//            $this->app->console->log($url.$e->getMessage(), Console::ERROR, true);
 
             if (!$retry) {
                 return $this->request($url, $method, $options, true);
