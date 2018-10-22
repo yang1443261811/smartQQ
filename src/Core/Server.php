@@ -26,7 +26,7 @@ class Server
             $this->init();
         }
 
-        $this->app->message->listen();
+//        $this->app->message->listen();
     }
 
     /**
@@ -62,7 +62,7 @@ class Server
         foreach ($this->app->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'qrsig')) {
                 $qrsig = $cookie->getValue();
-                $this->app->config['ptqrtoken'] = static::hash33($qrsig);
+                $this->app->config['ptqrtoken'] = hash33($qrsig);
             }
         }
 
@@ -181,48 +181,5 @@ class Server
 
         $this->app->config['server.uin'] = $body['result']['uin'];
         $this->app->config['server.psessionid'] = $body['result']['psessionid'];
-
-    }
-
-    /**
-     * 生成ptqrtoken的哈希函数.
-     *
-     * @param string $string
-     *
-     * @return int
-     */
-    public static function hash33($string)
-    {
-        $e = 0;
-        $n = strlen($string);
-        for ($i = 0; $n > $i; ++$i) {
-            //64位php才进行32位转换
-            if (PHP_INT_MAX > 2147483647) {
-                $e = static::toUint32val($e);
-            }
-            $e += ($e << 5) + static::charCodeAt($string, $i);
-        }
-
-        return 2147483647 & $e;
-    }
-
-    /**
-     * 计算字符的unicode，类似js中charCodeAt
-     * [Link](http://www.phpjiayuan.com/90/225.html).
-     *
-     * @param string $str
-     * @param int $index
-     *
-     * @return null|number
-     */
-    public static function charCodeAt($str, $index)
-    {
-        $char = mb_substr($str, $index, 1, 'UTF-8');
-        if (mb_check_encoding($char, 'UTF-8')) {
-            $ret = mb_convert_encoding($char, 'UTF-32BE', 'UTF-8');
-            return hexdec(bin2hex($ret));
-        } else {
-            return null;
-        }
     }
 }

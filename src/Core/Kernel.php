@@ -38,7 +38,7 @@ class Kernel
             mkdir($this->app->config['path'], 0755, true);
         }
 
-        $this->app->config['path'] = realpath($this->vbot->config['path']);
+        $this->app->config['path'] = realpath($this->app->config['path']);
     }
 
     /**
