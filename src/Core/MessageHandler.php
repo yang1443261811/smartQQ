@@ -10,6 +10,10 @@ class MessageHandler
 
     protected $handler;
 
+    const URL = 'http://d1.web2.qq.com/channel/poll2';
+
+    const REFERER = 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2';
+
     public function __construct(App $app)
     {
         $this->app = $app;
@@ -28,12 +32,13 @@ class MessageHandler
 
     public function pollMessage()
     {
-        $options = array('headers' => ['Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']);
+        $config = app('config')['server'];
+        $options = array('headers' => ['Referer' => self::REFERER]);
 
-        $result = $this->app->http->post('http://d1.web2.qq.com/channel/poll2', [
-            'clientid'   => $this->app->config['clientid'],
-            'ptwebqq'    => $this->app->config['server.ptwebqq'],
-            'psessionid' => $this->app->config['server.psessionid'],
+        $result = app('http')->post(self::URL, [
+            'clientid'   => $config['clientid'],
+            'ptwebqq'    => $config['server.ptwebqq'],
+            'psessionid' => $config['server.psessionid'],
             'key' => '',
         ], $options);
 
