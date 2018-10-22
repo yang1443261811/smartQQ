@@ -16,6 +16,7 @@ class Kernel
 
     public function bootstrap()
     {
+        $this->initializeConfig();
         $this->setLog();
         $this->bootstrapException();
     }
@@ -33,7 +34,11 @@ class Kernel
      */
     private function initializeConfig()
     {
+        if (!is_dir($this->app->config['path'])) {
+            mkdir($this->app->config['path'], 0755, true);
+        }
 
+        $this->app->config['path'] = realpath($this->vbot->config['path']);
     }
 
     /**
