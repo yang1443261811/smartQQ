@@ -15,6 +15,8 @@ use Illuminate\Config\Repository;
  */
 class App extends Container
 {
+    protected static $instance;
+
     protected $providers = [
         ServiceProviders\LogServiceProvider::class,
         ServiceProviders\HttpServiceProvider::class,
@@ -31,6 +33,8 @@ class App extends Container
         $this->registerProviders();
 
         (new Kernel($this))->bootstrap();
+
+        static::$instance = $this;
     }
 
     private function initializeConfig(array $config)
@@ -53,5 +57,14 @@ class App extends Container
     public function __set($id, $value)
     {
         return $this->offsetSet($id, $value);
+    }
+
+    public static function getInstance()
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new static;
+        }
+
+        return static::$instance;
     }
 }

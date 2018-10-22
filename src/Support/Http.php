@@ -8,9 +8,10 @@ use GuzzleHttp\Cookie\FileCookieJar;
 
 class Http
 {
-    protected $client;
 
     protected $app;
+
+    protected $client;
 
     protected $cookieJar;
 
@@ -55,7 +56,7 @@ class Http
 
             return $response->getBody()->getContents();
         } catch (\Exception $e) {
-//            $this->app->console->log($url.$e->getMessage(), Console::ERROR, true);
+            $this->app->log->debug($url.$e->getMessage());
 
             if (!$retry) {
                 return $this->request($url, $method, $options, true);

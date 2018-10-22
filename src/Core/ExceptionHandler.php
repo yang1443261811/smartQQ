@@ -3,6 +3,7 @@
 namespace smartQQ\Core;
 
 use Throwable;
+use ErrorException;
 
 class ExceptionHandler
 {
@@ -15,13 +16,16 @@ class ExceptionHandler
 
     public function handleError($level, $message, $file = '', $line = 0)
     {
-        echo 'error';
+        if (error_reporting() & $level) {
+            throw new ErrorException($message, 0, $level, $file, $line);
+        }
     }
 
     public function handleException(Throwable $e)
     {
-        echo $e->getMessage();
-        $this->app->log->error($e->getMessage());
+        $this->app->log->error($e->getMessage() . ' ' . $e->getFile() . ' on line ' . $e->getLine());
+
+        throw $e;
     }
 
     public function handleShutdown()

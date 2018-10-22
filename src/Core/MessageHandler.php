@@ -31,9 +31,9 @@ class MessageHandler
         $options = array('headers' => ['Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']);
 
         $result = $this->app->http->post('http://d1.web2.qq.com/channel/poll2', [
-            'ptwebqq'    => $this->app->config['ptwebqq'],
             'clientid'   => $this->app->config['clientid'],
-            'psessionid' => $this->app->config['psessionid'],
+            'ptwebqq'    => $this->app->config['server.ptwebqq'],
+            'psessionid' => $this->app->config['server.psessionid'],
             'key' => '',
         ], $options);
 
