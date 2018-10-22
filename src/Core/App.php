@@ -12,6 +12,7 @@ use Illuminate\Config\Repository;
  * @property \smartQQ\Core\ExceptionHandler $exception
  * @property \smartQQ\Support\Log $log
  * @property \Illuminate\Config\Repository $config
+ * @property \Illuminate\Cache\Repository $cache
  */
 class App extends Container
 {

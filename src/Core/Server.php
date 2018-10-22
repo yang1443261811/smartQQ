@@ -40,7 +40,7 @@ class Server
             return false;
         }
 
-        $this->app->config['server'] = json_decode(file_get_contents($this->app->config['credential_file']), true);
+        $this->app->config['server'] = $this->app->credential->get();
 
         $response = $this->app->message->pollMessage();
         if (!$response || strpos($response['retmsg'], 'login error') !== false) {
@@ -72,7 +72,7 @@ class Server
     /**
      * 等待扫码登陆
      *
-     * @return void
+     * @throws LoginException
      */
     public function waitForLogin()
     {
@@ -117,10 +117,7 @@ class Server
         $this->getVfWebQQ();
         $this->getUinAndPSessionId();
         //持久化登陆信息
-        $credential = json_encode($this->app->config['server']);
-        file_put_contents($this->app->config['credential_file'], $credential);
-
-
+        $this->app->credential->store($this->app->config['server']);
     }
 
     /**
@@ -132,14 +129,12 @@ class Server
     protected function getPtWebQQ()
     {
         $this->app->http->get($this->app->config['certificationUrl']);
-
         foreach ($this->app->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'ptwebqq')) {
                 $this->app->config['server.ptwebqq'] = $cookie->getValue();
                 return;
             }
         }
-
         throw new LoginException('Can not find parameter [ptwebqq]');
     }
 

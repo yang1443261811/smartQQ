@@ -1,9 +1,9 @@
 <?php
-$path = './tmp/';
+$path = './Storage/';
 
 $config = array(
     'path'              => $path,
-    'credential_file'   => './credential.php',
+    'credential_file'   => './credential.json',
     'cookie_file'       => './cookie.txt',
     'clientid'          => 53999199,
 
@@ -13,25 +13,8 @@ $config = array(
     'log'      => [
         'level'         => 'debug',
         'permission'    => 0777,
-        'system'        => $path.'log.txt', // 系统报错日志
-        'message'       => $path.'log.txt', // 消息日志
-    ],
-
-    /**
-     * 缓存配置项
-     */
-    'cache' => [
-        'default' => 'file', // 缓存设置 （支持 redis 或 file）
-        'stores'  => [
-            'file' => [
-                'driver' => 'file',
-                'path'   => $path.'cache',
-            ],
-            'redis' => [
-                'driver'     => 'redis',
-                'connection' => 'default',
-            ],
-        ],
+        'system'        => $path.'logs/log.txt', // 系统报错日志
+        'message'       => $path.'logs/log.txt', // 消息日志
     ],
 );
 
