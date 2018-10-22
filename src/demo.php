@@ -15,3 +15,4 @@ $app->message->setHandler(function ($msg) {
 
 $app->server->server();
 
+//echo app('config')['credential_file'];

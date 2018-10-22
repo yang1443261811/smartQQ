@@ -36,6 +36,9 @@ class Kernel
 
     }
 
+    /**
+     * 配置日志
+     */
     private function setLog()
     {
         $config = $this->app->config['log'];

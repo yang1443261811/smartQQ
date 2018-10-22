@@ -3,7 +3,7 @@ $path = './tmp/';
 
 $config = array(
     'path'              => $path,
-    'credential_file'   => './credential.json',
+    'credential_file'   => './credential.php',
     'cookie_file'       => './cookie.txt',
     'clientid'          => 53999199,
 

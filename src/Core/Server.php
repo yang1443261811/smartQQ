@@ -40,10 +40,7 @@ class Server
             return false;
         }
 
-        $config = json_decode(file_get_contents($this->app->config['credential_file']), true);
-        foreach ($config as $key => $val) {
-            $this->app->config[$key] = $val;
-        }
+        $this->app->config['server'] = json_decode(file_get_contents($this->app->config['credential_file']), true);
 
         $response = $this->app->message->pollMessage();
         if (!$response || strpos($response['retmsg'], 'login error') !== false) {
@@ -81,16 +78,31 @@ class Server
     {
         echo "请扫码登陆";
         while (true) {
-            $status = $this->getQcCodeStatus();
-            if ($status == 4) {
-                echo "\r\n登陆成功";
-                break;
-            } elseif ($status == 2) {
-                $this->makeQrCodeImg();
-                echo "\r\n二维码失效,请重新扫码";
+            $uri = "https://ssl.ptlogin2.qq.com/ptqrlogin?ptqrtoken={$this->app->config['ptqrtoken']}&webqq_type=10&remember_uin=1&login2qq=1&aid=501004106&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-4303&mibao_css=m_webqq&t=undefined&g=1&js_type=0&js_ver=10203&login_sig=&pt_randsalt=0";
+            $text = $this->app->http->get($uri);
+
+            switch (true) {
+                case (false !== strpos($text, '认证中')):
+                case (false !== strpos($text, '未失效')):
+                    echo '.';
+                    break;
+                case (false !== strpos($text, '已失效')):
+                    $this->app->log->addInfo('二维码失效,请重新扫码');
+                    $this->makeQrCodeImg();
+                    break;
+                default:
+                    //找出认证url
+                    if (!preg_match("#'(http.+)'#U", strval($text), $matches)) {
+                        throw new LoginException('Can not find certification url');
+                    }
+
+                    $this->app->config['certificationUrl'] = trim($matches[1]);
+                    $this->app->log->addInfo('二维码认证成功');
+
+                    return;
             }
+
             sleep(1);
-            echo '.';
         }
     }
 
@@ -105,14 +117,10 @@ class Server
         $this->getVfWebQQ();
         $this->getUinAndPSessionId();
         //持久化登陆信息
-        $credential = json_encode([
-            'uin'        => $this->app->config['uin'],
-            'ptwebqq'    => $this->app->config['ptwebqq'],
-            'vfwebqq'    => $this->app->config['vfwebqq'],
-            'psessionid' => $this->app->config['psessionid'],
-        ]);
-
+        $credential = json_encode($this->app->config['server']);
         file_put_contents($this->app->config['credential_file'], $credential);
+
+
     }
 
     /**
@@ -127,7 +135,7 @@ class Server
 
         foreach ($this->app->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'ptwebqq')) {
-                $this->app->config['ptwebqq'] = $cookie->getValue();
+                $this->app->config['server.ptwebqq'] = $cookie->getValue();
                 return;
             }
         }
@@ -143,7 +151,7 @@ class Server
      */
     protected function getVfWebQQ()
     {
-        $url = sprintf("http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=53999199&psessionid=&t=0.1", $this->app->config['ptwebqq']);
+        $url = sprintf("http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=53999199&psessionid=&t=0.1", $this->app->config['server.ptwebqq']);
         $options = array('headers' => ['Referer' => 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1']);
 
         $response = $this->app->http->get($url, $options);
@@ -153,7 +161,7 @@ class Server
             throw new LoginException('Can not find parameter [vfwebqq]');
         }
 
-        $this->app->config['vfwebqq'] = $body['result']['vfwebqq'];
+        $this->app->config['server.vfwebqq'] = $body['result']['vfwebqq'];
     }
 
     /**
@@ -168,7 +176,7 @@ class Server
         $body = $this->app->http->post('http://d1.web2.qq.com/channel/login2', [
             'psessionid' => '',
             'status'     => 'online',
-            'ptwebqq'    => $this->app->config['ptwebqq'],
+            'ptwebqq'    => $this->app->config['server.ptwebqq'],
             'clientid'   => $this->app->config['clientid'],
         ], $options);
 
@@ -176,36 +184,9 @@ class Server
             throw new LoginException('Can not find parameter [uin and psessionid]');
         }
 
-        $this->app->config['uin'] = $body['result']['uin'];
-        $this->app->config['psessionid'] = $body['result']['psessionid'];
+        $this->app->config['server.uin'] = $body['result']['uin'];
+        $this->app->config['server.psessionid'] = $body['result']['psessionid'];
 
-    }
-
-    /**
-     * 获取登陆二维码的状态
-     *
-     * @return int
-     * @throws LoginException
-     */
-    protected function getQcCodeStatus()
-    {
-        $uri = "https://ssl.ptlogin2.qq.com/ptqrlogin?ptqrtoken={$this->app->config['ptqrtoken']}&webqq_type=10&remember_uin=1&login2qq=1&aid=501004106&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-4303&mibao_css=m_webqq&t=undefined&g=1&js_type=0&js_ver=10203&login_sig=&pt_randsalt=0";
-        $text = $this->app->http->get($uri);
-        switch (true) {
-            case (false !== strpos($text, '未失效')):
-                return 1;
-            case (false !== strpos($text, '已失效')):
-                return 2;
-            case (false !== strpos($text, '认证中')):
-                return 3;
-            default:
-                //找出认证url
-                if (preg_match("#'(http.+)'#U", strval($text), $matches)) {
-                    $this->app->config['certificationUrl'] = trim($matches[1]);
-                    return 4;
-                }
-                throw new LoginException('Can not find certification url');
-        }
     }
 
     /**
