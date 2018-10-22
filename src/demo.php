@@ -1,6 +1,6 @@
 <?php
 use smartQQ\Core\App;
-
+use smartQQ\Request\Groups;
 require '../vendor/autoload.php';
 require 'smartQQ.php';
 
@@ -12,5 +12,8 @@ $app->message->setHandler(function ($msg) {
 });
 
 $app->server->server();
+
+$result = (new Groups())->get();
+p($result);
 
 //echo app('config')['credential_file'];
