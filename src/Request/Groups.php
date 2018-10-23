@@ -19,15 +19,17 @@ class Groups
      *
      * @return mixed
      */
-    public function get()
+    public static function get()
     {
         $config = app('config')['server'];
 
         $options = array('headers' => ['Referer' => self::REFERER]);
 
-        return app('http')->post(self::URL, [
+        $result = app('http')->post(self::URL, [
             'vfwebqq' => $config['vfwebqq'],
             'hash'    => hashArgs($config['uin'], $config['ptwebqq']),
         ], $options);
+
+        return $result;
     }
 }
