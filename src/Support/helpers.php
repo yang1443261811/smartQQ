@@ -137,6 +137,7 @@ if (!function_exists('p')) {
         echo '<pre>';
         print_r($data);
         echo '</pre>';
+        die;
     }
 }
 

@@ -36,10 +36,10 @@ class MessageHandler
         $options = array('headers' => ['Referer' => self::REFERER]);
 
         $result = app('http')->post(self::URL, [
-            'clientid'   => $config['clientid'],
-            'ptwebqq'    => $config['server.ptwebqq'],
-            'psessionid' => $config['server.psessionid'],
             'key' => '',
+            'clientid'   => app('config')['clientid'],
+            'ptwebqq'    => app('config')['server.ptwebqq'],
+            'psessionid' => app('config')['server.psessionid'],
         ], $options);
 
         return $result;
