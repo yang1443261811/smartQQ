@@ -2,6 +2,7 @@
 
 namespace smartQQ\Core;
 
+use smartQQ\Foundation\App;
 use smartQQ\Exception\LoginException;
 
 class Server
@@ -58,7 +59,6 @@ class Server
     protected function makeQrCodeImg()
     {
         $response = $this->app->http->get('https://ssl.ptlogin2.qq.com/ptqrshow?appid=501004106&e=0&l=M&s=5&d=72&v=4&t=0.1');
-
         foreach ($this->app->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'qrsig')) {
                 $qrsig = $cookie->getValue();
@@ -135,6 +135,7 @@ class Server
                 return;
             }
         }
+
         throw new LoginException('Can not find parameter [ptwebqq]');
     }
 
@@ -170,9 +171,9 @@ class Server
         $options = array('headers' => ['Referer' => 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2']);
         $body = $this->app->http->post('http://d1.web2.qq.com/channel/login2', [
             'psessionid' => '',
-            'status'     => 'online',
-            'ptwebqq'    => $this->app->config['server.ptwebqq'],
-            'clientid'   => $this->app->config['clientid'],
+            'status' => 'online',
+            'ptwebqq' => $this->app->config['server.ptwebqq'],
+            'clientid' => $this->app->config['clientid'],
         ], $options);
 
         if (empty($body['result']['uin']) || empty($body['result']['psessionid'])) {

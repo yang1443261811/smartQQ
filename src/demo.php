@@ -1,5 +1,5 @@
 <?php
-use smartQQ\Core\App;
+use smartQQ\Foundation\App;
 use smartQQ\Request\Groups;
 use smartQQ\Request\Discusses;
 use smartQQ\Request\Friends;

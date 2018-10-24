@@ -1,5 +1,5 @@
 <?php
-namespace smartQQ\Core;
+namespace smartQQ\Foundation;
 
 use Pimple\Container;
 use Illuminate\Config\Repository;
