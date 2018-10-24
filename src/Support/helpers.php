@@ -1,6 +1,6 @@
 <?php
 
-use smartQQ\Core\App;
+use smartQQ\Foundation\App;
 
 if (!function_exists('app')) {
     /**

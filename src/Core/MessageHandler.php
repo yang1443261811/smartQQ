@@ -2,6 +2,7 @@
 
 namespace smartQQ\Core;
 
+use smartQQ\Foundation\App;
 use smartQQ\Exception\ArgumentException;
 
 class MessageHandler
@@ -37,8 +38,8 @@ class MessageHandler
 
         $result = app('http')->post(self::URL, [
             'key' => '',
-            'clientid'   => app('config')['clientid'],
-            'ptwebqq'    => app('config')['server.ptwebqq'],
+            'clientid' => app('config')['clientid'],
+            'ptwebqq' => app('config')['server.ptwebqq'],
             'psessionid' => app('config')['server.psessionid'],
         ], $options);
 

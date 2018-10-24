@@ -21,15 +21,13 @@ class Groups
      */
     public static function get()
     {
-        $config = app('config')['server'];
-
         $options = array('headers' => ['Referer' => self::REFERER]);
 
-        $result = app('http')->post(self::URL, [
-            'vfwebqq' => $config['vfwebqq'],
-            'hash'    => hashArgs($config['uin'], $config['ptwebqq']),
-        ], $options);
+        $params = [
+            'vfwebqq' => app('config')['server.vfwebqq'],
+            'hash'    => hashArgs(app('config')['server.uin'], app('config')['server.ptwebqq']),
+        ];
 
-        return $result;
+        return app('http')->post(self::URL, $params, $options);
     }
 }

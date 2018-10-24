@@ -1,10 +1,10 @@
 <?php
 
-namespace smartQQ\Core\ServiceProviders;
+namespace smartQQ\Foundation\ServiceProviders;
 
 use Pimple\Container;
-use smartQQ\Core\ExceptionHandler;
 use Pimple\ServiceProviderInterface;
+use smartQQ\Foundation\ExceptionHandler;
 
 class ExceptionServiceProvider implements ServiceProviderInterface
 {

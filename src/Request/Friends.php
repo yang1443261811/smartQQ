@@ -25,6 +25,7 @@ class Friends
             'vfwebqq' => app('config')['server.vfwebqq'],
             'hash'    => hashArgs(app('config')['server.uin'], app('config')['server.ptwebqq'])
         ];
+
         $options = ['headers' => ['Referer' => self::REFERER]];
 
         return app('http')->post(self::URL, $params, $options);

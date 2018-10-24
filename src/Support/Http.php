@@ -2,7 +2,7 @@
 
 namespace smartQQ\Support;
 
-use smartQQ\Core\App;
+use smartQQ\Foundation\App;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Cookie\FileCookieJar;
 

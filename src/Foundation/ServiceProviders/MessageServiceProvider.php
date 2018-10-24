@@ -1,6 +1,6 @@
 <?php
 
-namespace smartQQ\Core\ServiceProviders;
+namespace smartQQ\Foundation\ServiceProviders;
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;

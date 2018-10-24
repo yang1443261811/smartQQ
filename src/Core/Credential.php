@@ -2,6 +2,8 @@
 
 namespace smartQQ\Core;
 
+use smartQQ\Foundation\App;
+
 class Credential
 {
     protected $app;

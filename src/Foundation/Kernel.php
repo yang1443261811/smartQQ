@@ -1,6 +1,6 @@
 <?php
 
-namespace smartQQ\Core;
+namespace smartQQ\Foundation;
 
 use Monolog\Handler\StreamHandler;
 
