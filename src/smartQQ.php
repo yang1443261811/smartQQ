@@ -3,8 +3,9 @@ $path = './Storage/';
 
 $config = array(
     'path'              => $path,
-    'credential_file'   => './credential.json',
-    'cookie_file'       => './cookie.txt',
+    'credential_file'   => $path.'/credential.json',
+    'cookie_file'       => $path.'/cookie.txt',
+    'qrCode_dir'        => $path.'/qrCode.png',
     'clientid'          => 53999199,
 
     /**

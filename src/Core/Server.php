@@ -66,7 +66,7 @@ class Server
             }
         }
 
-        file_put_contents('qrCode.png', $response);
+        file_put_contents($this->app->config['qrCode_dir'], $response);
     }
 
     /**
