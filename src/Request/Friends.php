@@ -19,7 +19,7 @@ class Friends
      *
      * @return mixed
      */
-    public static function get()
+    public function get()
     {
         $params = [
             'vfwebqq' => app('config')['server.vfwebqq'],

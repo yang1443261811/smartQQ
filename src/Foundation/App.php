@@ -6,11 +6,16 @@ use Illuminate\Config\Repository;
 
 /**
  * @property \smartQQ\Support\Http $http
- * @property \smartQQ\Core\Credential $credential
- * @property \smartQQ\Core\MessageHandler $message
- * @property \smartQQ\Core\Server $server
- * @property \smartQQ\Core\ExceptionHandler $exception
  * @property \smartQQ\Support\Log $log
+ * @property \smartQQ\Core\Credential $credential
+ * @property \smartQQ\Core\Server $server
+ * @property \smartQQ\Request\PollMessage $message
+ * @property \smartQQ\Request\Discusses $discusses
+ * @property \smartQQ\Request\Friends $friends
+ * @property \smartQQ\Request\Groups $groups
+ * @property \smartQQ\Request\Myself $myself
+ * @property \smartQQ\Request\RecentList $recentList
+ * @property \smartQQ\Foundation\ExceptionHandler $exception
  * @property \Illuminate\Config\Repository $config
  * @property \Illuminate\Cache\Repository $cache
  */
@@ -22,7 +27,7 @@ class App extends Container
         ServiceProviders\LogServiceProvider::class,
         ServiceProviders\HttpServiceProvider::class,
         ServiceProviders\ServerServiceProvider::class,
-        ServiceProviders\MessageServiceProvider::class,
+        ServiceProviders\RequestServiceProvider::class,
         ServiceProviders\ExceptionServiceProvider::class,
         ServiceProviders\CredentialServiceProvider::class,
     ];

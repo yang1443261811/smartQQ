@@ -19,7 +19,7 @@ class Groups
      *
      * @return mixed
      */
-    public static function get()
+    public function get()
     {
         $options = array('headers' => ['Referer' => self::REFERER]);
 
