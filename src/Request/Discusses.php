@@ -15,7 +15,7 @@ class Discusses
      *
      * @return array|mixed|object|\stdClass
      */
-    public static function get()
+    public function get()
     {
         $url = sprintf(
             'http://s.web2.qq.com/api/get_discus_list?clientid=53999199&psessionid=%s&vfwebqq=%s&t=0.1',

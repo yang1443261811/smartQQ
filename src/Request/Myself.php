@@ -17,7 +17,7 @@ class Myself
      *
      * @return mixed
      */
-    public static function get()
+    public function get()
     {
         $options = ['headers' => ['Referer' => self::REFERER]];
 

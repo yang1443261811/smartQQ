@@ -27,7 +27,7 @@ class Server
             $this->init();
         }
 
-//        $this->app->message->listen();
+        $this->app->message->listen();
     }
 
     /**
@@ -43,7 +43,7 @@ class Server
 
         $this->app->config['server'] = $this->app->credential->get();
 
-        $response = $this->app->message->pollMessage();
+        $response = $this->app->message->get();
         if (!$response || strpos($response['retmsg'], 'login error') !== false) {
             return false;
         }

@@ -19,7 +19,7 @@ class RecentList
      *
      * @return mixed
      */
-    public static function get()
+    public function get()
     {
         $params = [
             'clientid'   => app('config')['clientid'],
