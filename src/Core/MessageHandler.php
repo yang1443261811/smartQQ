@@ -3,6 +3,7 @@
 namespace smartQQ\Core;
 
 use smartQQ\Foundation\App;
+use smartQQ\Request\PollMessage;
 use smartQQ\Exception\ArgumentException;
 
 class MessageHandler
@@ -10,10 +11,6 @@ class MessageHandler
     protected $app;
 
     protected $handler;
-
-    const URL = 'http://d1.web2.qq.com/channel/poll2';
-
-    const REFERER = 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2';
 
     public function __construct(App $app)
     {
@@ -23,27 +20,12 @@ class MessageHandler
     public function listen()
     {
         while (true) {
-            $response = $this->pollMessage();
+            $response = PollMessage::get();
 
             call_user_func_array($this->handler, [$response]);
 
             sleep(1);
         }
-    }
-
-    public function pollMessage()
-    {
-        $config = app('config')['server'];
-        $options = array('headers' => ['Referer' => self::REFERER]);
-
-        $result = app('http')->post(self::URL, [
-            'key' => '',
-            'clientid' => app('config')['clientid'],
-            'ptwebqq' => app('config')['server.ptwebqq'],
-            'psessionid' => app('config')['server.psessionid'],
-        ], $options);
-
-        return $result;
     }
 
     public function handleMessage($text)
