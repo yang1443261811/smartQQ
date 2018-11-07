@@ -54,9 +54,9 @@ class Server
     /**
      * 获取登陆二维码,并将二维码保存到本地
      *
-     * @return string
+     * @return mixed
      */
-    public function makeQrCodeImg()
+    protected function makeQrCodeImg()
     {
         $response = $this->app->http->get('https://ssl.ptlogin2.qq.com/ptqrshow?appid=501004106&e=0&l=M&s=5&d=72&v=4&t=0.1');
         foreach ($this->app->http->getCookies() as $cookie) {
@@ -103,7 +103,6 @@ class Server
 
                     return true;
             }
-
             sleep(1);
         }
     }
@@ -125,7 +124,6 @@ class Server
     /**
      * 获取鉴权字段ptwebqq
      *
-     * @return string
      * @throws LoginException
      */
     protected function getPtWebQQ()
@@ -143,7 +141,6 @@ class Server
     /**
      * 获取鉴权字段vfwebqq
      *
-     * @return string
      * @throws LoginException
      */
     protected function getVfWebQQ()
@@ -164,7 +161,6 @@ class Server
     /**
      * 获取鉴权字段uin和psessionid
      *
-     * @return array
      * @throws LoginException
      */
     protected function getUinAndPSessionId()

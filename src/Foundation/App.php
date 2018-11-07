@@ -47,7 +47,6 @@ class App extends Container
         if (empty($config)) {
             $config = getConfig();
         }
-
         $this->config = new Repository($config);
     }
 
