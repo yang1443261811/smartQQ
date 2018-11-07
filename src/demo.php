@@ -1,10 +1,5 @@
 <?php
 use smartQQ\Foundation\App;
-use smartQQ\Request\Groups;
-use smartQQ\Request\Discusses;
-use smartQQ\Request\Friends;
-use smartQQ\Request\RecentList;
-use smartQQ\Request\Myself;
 require '../vendor/autoload.php';
 require 'smartQQ.php';
 
@@ -16,8 +11,6 @@ $app->message->setHandler(function ($msg) {
 
 $app->server->server();
 
-$data = Myself::get();
-p($data);
 
 //$friend = $data['result']['friends'][0];
 //$marknames = $data['result']['marknames'][0];

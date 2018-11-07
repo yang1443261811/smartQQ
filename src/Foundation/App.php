@@ -17,7 +17,6 @@ use Illuminate\Config\Repository;
  * @property \smartQQ\Request\RecentList $recentList
  * @property \smartQQ\Foundation\ExceptionHandler $exception
  * @property \Illuminate\Config\Repository $config
- * @property \Illuminate\Cache\Repository $cache
  */
 class App extends Container
 {
@@ -45,6 +44,10 @@ class App extends Container
 
     private function initializeConfig(array $config)
     {
+        if (empty($config)) {
+            $config = getConfig();
+        }
+
         $this->config = new Repository($config);
     }
 

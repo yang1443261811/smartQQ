@@ -54,9 +54,9 @@ class Server
     /**
      * 获取登陆二维码,并将二维码保存到本地
      *
-     * @return void
+     * @return string
      */
-    protected function makeQrCodeImg()
+    public function makeQrCodeImg()
     {
         $response = $this->app->http->get('https://ssl.ptlogin2.qq.com/ptqrshow?appid=501004106&e=0&l=M&s=5&d=72&v=4&t=0.1');
         foreach ($this->app->http->getCookies() as $cookie) {
@@ -67,6 +67,8 @@ class Server
         }
 
         file_put_contents($this->app->config['qrCode_dir'], $response);
+
+        return $response;
     }
 
     /**
@@ -99,7 +101,7 @@ class Server
                     $this->app->config['certificationUrl'] = trim($matches[1]);
                     $this->app->log->addInfo('二维码认证成功');
 
-                    return;
+                    return true;
             }
 
             sleep(1);
@@ -123,7 +125,7 @@ class Server
     /**
      * 获取鉴权字段ptwebqq
      *
-     * @return void
+     * @return string
      * @throws LoginException
      */
     protected function getPtWebQQ()
@@ -131,8 +133,7 @@ class Server
         $this->app->http->get($this->app->config['certificationUrl']);
         foreach ($this->app->http->getCookies() as $cookie) {
             if (0 == strcasecmp($cookie->getName(), 'ptwebqq')) {
-                $this->app->config['server.ptwebqq'] = $cookie->getValue();
-                return;
+                return $this->app->config['server.ptwebqq'] = $cookie->getValue();
             }
         }
 
@@ -142,7 +143,7 @@ class Server
     /**
      * 获取鉴权字段vfwebqq
      *
-     * @return void
+     * @return string
      * @throws LoginException
      */
     protected function getVfWebQQ()
@@ -157,13 +158,13 @@ class Server
             throw new LoginException('Can not find parameter [vfwebqq]');
         }
 
-        $this->app->config['server.vfwebqq'] = $body['result']['vfwebqq'];
+        return $this->app->config['server.vfwebqq'] = $body['result']['vfwebqq'];
     }
 
     /**
      * 获取鉴权字段uin和psessionid
      *
-     * @return void
+     * @return array
      * @throws LoginException
      */
     protected function getUinAndPSessionId()
@@ -182,5 +183,10 @@ class Server
 
         $this->app->config['server.uin'] = $body['result']['uin'];
         $this->app->config['server.psessionid'] = $body['result']['psessionid'];
+
+        return [
+            'uin'        => $body['result']['uin'],
+            'psessionid' => $body['result']['psessionid']
+        ];
     }
 }

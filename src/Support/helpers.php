@@ -20,6 +20,17 @@ if (!function_exists('app')) {
     }
 }
 
+if (!function_exists('getConfig')) {
+    /**
+     * 获取默认配置文件
+     */
+    function getConfig()
+    {
+        require_once('../smartQQ.php');
+        return $config;
+    }
+}
+
 if (!function_exists('hash33')) {
     /**
      * 生成ptqrtoken的哈希函数.
